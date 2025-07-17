@@ -2,12 +2,12 @@
 import yaml
 import os
 import logging
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 logger = logging.getLogger(__name__)
 
 class PromptManager:
-    def __init__(self, yaml_path: str = None):
+    def __init__(self, yaml_path: Optional[str] = None):
         if yaml_path is None:
             # 현재 파일 위치를 기준으로 prompt.yaml 경로 설정
             current_dir = os.path.dirname(__file__)

@@ -138,8 +138,7 @@ class VisionAnalyzer:
             # Make the API call
             logger.info("Sending CT scan to OpenAI for analysis...")
             
-            response = await asyncio.to_thread(
-                self.client.chat.completions.create,
+            response = self.client.chat.completions.create(
                 model=self.model_name,
                 messages=messages,
                 temperature=self.temperature,

@@ -7,6 +7,7 @@ from PIL import Image
 import cv2
 import pydicom
 from pydicom.errors import InvalidDicomError
+from pydicom import multival
 from io import BytesIO
 import base64
 import sys
@@ -94,9 +95,9 @@ class ImageProcessor:
                 window_center = ds.WindowCenter
                 window_width = ds.WindowWidth
 
-                if isinstance(window_center, (list, pydicom.multival.MultiValue)):
+                if isinstance(window_center, (list, multival.MultiValue)):
                     window_center = window_center[0]
-                if isinstance(window_width, (list, pydicom.multival.MultiValue)):
+                if isinstance(window_width, (list, multival.MultiValue)):
                     window_width = window_width[0]
                 
                 pixel_array = self._apply_window_level(pixel_array, window_center, window_width)
@@ -174,9 +175,7 @@ class ImageProcessor:
     
     def get_image_metadata(self, file_path: str) -> dict:
         try:
-
-            if is_dicom is None:
-                is_dicom = self._is_dicom_file(file_path)
+            is_dicom = self._is_dicom_file(file_path)
 
             metadata = {
                 'filename': os.path.basename(file_path),
