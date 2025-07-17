@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, Depends, UploadFile, File, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 import tempfile
 import os
 from contextlib import asynccontextmanager
@@ -56,13 +57,29 @@ app = FastAPI(
 )
 
 # CORS configuration
+allowed_origins = [
+    "http://localhost:3000",  # Local development
+    "http://localhost:5173",  # Vite dev server
+    "http://localhost:5174"   # Alternative Vite dev server
+]
+
+# Add production origins from environment variable
+production_origin = os.getenv("FRONTEND_URL")
+if production_origin:
+    allowed_origins.append(production_origin)
+
+# Allow Netlify preview deployments (can be customized)
+netlify_pattern = os.getenv("NETLIFY_URL_PATTERN", "*.netlify.app")
+if netlify_pattern:
+    allowed_origins.append(f"https://{netlify_pattern}")
+
+# Development: Allow all HTTPS origins if FRONTEND_URL is not set
+if not production_origin and os.getenv("ENVIRONMENT") == "development":
+    allowed_origins.append("https://*.netlify.app")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",  # Allow create-react-app default port
-        "http://localhost:5173",  # Default Vite dev server
-        "http://localhost:5174"   # Alternative Vite dev server
-    ],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
@@ -110,6 +127,12 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
 async def health_check():
     """Health check endpoint"""
     return {"status": "healthy", "service": "NSCLC Staging API"}
+
+@app.get("/favicon.ico")
+async def favicon():
+    """Return favicon to prevent 404 errors"""
+    from fastapi.responses import Response
+    return Response(status_code=204)  # No Content
 
 @app.post("/analyze", response_model=AnalysisResponse)
 async def analyze_image(

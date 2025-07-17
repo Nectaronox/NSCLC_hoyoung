@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: nsclc-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    healthCheckPath: /health
+    env: production
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: HOST
+        value: 0.0.0.0
+      - key: LOG_LEVEL
+        value: INFO
+      - key: OPENAI_API_KEY
+        sync: false  # Set this in Render dashboard
+      - key: JWT_SECRET_KEY
+        generateValue: true 
